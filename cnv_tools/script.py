@@ -1,21 +1,18 @@
 from cnvpytor.root import Root
 import argparse
-
+import logging
 
 def cnvpytor(args):
-    print("pytor file.")
+    logger = logging.getLogger(args.tool)
     app = Root(args.pytor, create=True, max_cores=args.cpu)
-    print("Read depth.")
     app.rd([args.bam])
-    print(f"Calculate histograms {args.hists}")
     app.calculate_histograms(args.hists)
-    print(f"Partition")
     app.partition(args.hists)
     calls = app.call(args.hists, print_calls=True)
 
 
 def cnvkit(args):
-    raise NotImplemented()
+    raise NotImplementedError('CNVkit calling is not implemented yet!')
 
 def main():
     parser = argparse.ArgumentParser()
@@ -25,6 +22,7 @@ def main():
     parser.add_argument('--hists', nargs='+', help=' List of histogram bin sizes', default=[10000])
     parser.add_argument('--cpu', type=int, help='Max CPUs to use', default=4)
     args = parser.parse_args()
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
     if args.tool == 'cnvpytor':
         cnvpytor(args)
