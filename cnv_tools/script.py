@@ -16,8 +16,10 @@ def cnvpytor(args):
 
     #Write to output file
     for bin_size in calls:
-        pd.DataFrame(calls[bin_size]).to_csv(f'{args.output_dir}/{bam_name}_h{bin_size}.csv')
-
+        pd.DataFrame(calls[bin_size]).to_csv(f'{args.output_dir}/{bam_name}_h{bin_size}.csv',
+                                             index=False,
+                                             header=['id', 'type', 'start', 'end', 'size', 'cnv', 'p_val',
+                                                     'p_val_2', 'p_val_3', 'p_val_4', 'Q0', 'pN', 'dG'])
 
 def cnvkit(args):
     raise NotImplementedError('CNVkit calling is not implemented yet!')
@@ -39,7 +41,7 @@ def main():
     if args.tool == 'cnvpytor':
         cnvpytor(args)
 
-        
+
     elif args.tool == 'cnvkit':
         cnvkit(args)
 
