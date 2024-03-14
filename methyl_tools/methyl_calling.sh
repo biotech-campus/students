@@ -26,3 +26,9 @@ docker run -it --rm \
 #     --volume ${OUT_DIR}:${WORKDIR}/output \
 #     ${CONTAINER} \
 #         Rscript ${WORKDIR}/methyl_analysis.R
+# # Выполнение анализа в methylKit через .R скрипт
+# docker run -it --rm \
+#     --volume ${IN_DIR}:${WORKDIR}/input:ro \
+#     --volume ${OUT_DIR}:${WORKDIR}/output \
+#     ${CONTAINER} \
+#         Rscript ${WORKDIR}/methyl_analysis.R
