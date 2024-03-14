@@ -16,13 +16,13 @@ MEMORY=200G
 docker run -it --rm \
     --volume ${IN_DIR}:${WORKDIR}/input:ro \
     --volume ${OUT_DIR}:${WORKDIR}/output \
-    ${CONTAINER} \
-        python3 ${WORKDIR}/process_bam.py ${WORKDIR}/input/${BAMFILE1} ${WORKDIR}/output/output_first_data.txt
-        python3 ${WORKDIR}/process_bam.py ${WORKDIR}/input/${BAMFILE2} ${WORKDIR}/output/output_second_data.txt
+     ${CONTAINER} \
+    #     python3 ${WORKDIR}/process_bam.py ${WORKDIR}/input/${BAMFILE1} ${WORKDIR}/output/output_first_data.txt
+    #     python3 ${WORKDIR}/process_bam.py ${WORKDIR}/input/${BAMFILE2} ${WORKDIR}/output/output_second_data.txt
 
-# Выполнение анализа в methylKit через .R скрипт
-docker run -it --rm \
-    --volume ${IN_DIR}:${WORKDIR}/input:ro \
-    --volume ${OUT_DIR}:${WORKDIR}/output \
-    ${CONTAINER} \
-        Rscript ${WORKDIR}/methyl_analysis.R
+# # Выполнение анализа в methylKit через .R скрипт
+# docker run -it --rm \
+#     --volume ${IN_DIR}:${WORKDIR}/input:ro \
+#     --volume ${OUT_DIR}:${WORKDIR}/output \
+#     ${CONTAINER} \
+#         Rscript ${WORKDIR}/methyl_analysis.R

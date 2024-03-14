@@ -1,3 +1,6 @@
+# methylKit
+# https://github.com/al2na/methylKit
+# methylKit version: 1.29.1 commit 0a5581c
 FROM rocker/r-ver:4.0.0
 
 # Установка необходимых пакетов и зависимостей
