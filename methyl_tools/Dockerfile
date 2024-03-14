@@ -1,4 +1,4 @@
-# - parent imaexitge
+# - parent image
 FROM bioinformatics:latest
 
 # - author contacts
@@ -11,40 +11,53 @@ USER root
 # - update and upgrade system packages
 RUN apt update -y && apt upgrade -y
 # - system packages that all tools may require
-RUN apt install -y --upgrade wget apt-utils git build-essential python3-dev pigz gzip cmake zlib1g libbz2-dev g++
+RUN apt install -y --upgrade wget apt-utils git build-essential python3-dev pigz gzip cmake zlib1g libbz2-dev g++ make zlib1g-dev
 
 WORKDIR /home
 
-# Nanopolish 
-# https://github.com/jts/nanopolish
+# # Nanopolish 
+# # https://github.com/jts/nanopolish
 
-# By default, nanopolish will download and compile all of its required dependencies 
-# RUN apt install -y --upgrade libhdf5=1.8.14 eigen=3.2.5 htslib=1.15.1 minimap2 slow5lib
+# # By default, nanopolish will download and compile all of its required dependencies 
+# # RUN apt install -y --upgrade libhdf5=1.8.14 eigen=3.2.5 htslib=1.15.1 minimap2 slow5lib
 
-RUN git clone --recursive https://github.com/jts/nanopolish.git \
-    && cd nanopolish \
-    && make
+# RUN git clone --recursive https://github.com/jts/nanopolish.git \
+#     && cd nanopolish \
+#     && make
 
-RUN cd nanopolish \
-    && cp nanopolish /bin/nanopolish
+# RUN cd nanopolish \
+#     && cp nanopolish /bin/nanopolish
 
-# DeepMod2
-# https://github.com/WGLab/DeepMod2
+# # DeepMod2
+# # https://github.com/WGLab/DeepMod2
 
-RUN python3 -m pip install --upgrade pip 
+# RUN python3 -m pip install --upgrade pip 
 
-RUN pip install numpy pysam torch h5py tqdm numba pod5 ont-fast5-api
+# RUN pip install numpy pysam torch h5py tqdm numba pod5 ont-fast5-api
 
-RUN git clone https://github.com/WGLab/DeepMod2.git 
+# RUN git clone https://github.com/WGLab/DeepMod2.git 
 
-# MethPhaser
-# https://github.com/treangenlab/methphaser
+# # MethPhaser
+# # https://github.com/treangenlab/methphaser
 
-RUN pip install pandas scipy matplotlib seaborn certifi
+# RUN pip install pandas scipy matplotlib seaborn certifi
 
-RUN git clone https://github.com/treangenlab/methphaser.git
+# RUN git clone https://github.com/treangenlab/methphaser.git
 
-RUN python3 -m pip install --upgrade whatshap 
+# RUN python3 -m pip install --upgrade whatshap 
+
+
+
+
+# BSMAP
+# https://github.com/genome-vendor/bsmap/tree/v2.42
+
+# Клонирование репозитория BSMAP
+# RUN git clone https://github.com/genome-vendor/bsmap.git
+
+# Переход в директорию BSMAP и компиляция
+# RUN cd bsmap \
+#     && make
 
 # clean cache
 RUN apt clean && rm -rf /var/lib/apt/lists/*
