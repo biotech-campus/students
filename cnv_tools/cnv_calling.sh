@@ -60,3 +60,27 @@ then
                 --reference ${WORKDIR}/reference/hg38.fa \
                 --allow-overwrite            
 fi
+
+if [ "${TOOL}" = "svim" ]
+then 
+    docker run \
+        --cpus=${CPU} \
+        ${VOLUME_OPTIONS} \
+        ${CONTAINER} \
+            svim alignment \
+                ${WORKDIR}/output \
+                ${WORKDIR}/input/${BAM_FILE}.bam \
+                ${WORKDIR}/reference/hg38.fa  \
+                --min_mapq 14 \
+                --min_sv_size 1000 \
+                --types=DEL,INS,DUP:TANDEM 
+fi
+
+if [ "${TOOL}" = "gatk" ]
+then 
+    docker pull broadinstitute/gatk:latest
+    docker run -it --rm \
+        --cpus=${CPU} \
+        ${VOLUME_OPTIONS} \
+        broadinstitute/gatk
+fi

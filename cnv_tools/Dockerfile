@@ -25,10 +25,13 @@ ARG CNVKIT_VERSION="v0.9.10"
 RUN python3 -m pip install --no-cache hmmlearn
 RUN python3 -m pip install --no-cache git+https://github.com/etal/cnvkit.git@${CNVKIT_VERSION}
 
-
 # Sniffles2
 ARG SNIFFLES2_VERSION="v2.2"
 RUN python3 -m pip install --no-cache git+https://github.com/fritzsedlazeck/Sniffles.git@${SNIFFLES2_VERSION}
+
+# SVIM
+ARG SVIM_VERSION="v2.0.0"
+RUN python3 -m pip install --no-cache git+https://github.com/eldariont/svim.git@${SVIM_VERSION}
 
 # Script
 COPY script.py /home/script.py
