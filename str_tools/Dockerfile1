@@ -1,0 +1,30 @@
+# - parent image
+FROM continuumio/miniconda3:latest 
+
+# - author contacts
+LABEL author="lukianchikova.ei@phystech.edu"
+ENV DEBIAN_FRONTEND="noninteractive"
+USER root
+
+WORKDIR /home
+
+# - update and upgrade system packages
+RUN apt update -y && apt upgrade -y
+# - system packages that all tools may require
+RUN apt install -y --upgrade python3-dev wget apt-utils git build-essential pigz gzip cmake zlib1g libbz2-dev g++
+
+#STRspy
+#STRspy --https://github.com/unique379r/strspy
+RUN git clone https://github.com/unique379r/strspy.git \
+    && cd strspy . 
+
+
+
+#DeepRepeat 
+#DeepRepeat -- https://github.com/WGLab/DeepRepeat.git  
+RUN apt-get update && apt-get install -y git
+RUN git clone https://github.com/WGLab/DeepRepeat \
+    && cd DeepRepeat .
+ 
+# # clean cache 
+# RUN apt clean && rm -rf /var/lib/apt/lists/*
