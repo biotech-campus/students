@@ -1,0 +1,2 @@
+# - parent image
+FROM bioinformatics:latest
