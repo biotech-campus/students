@@ -15,5 +15,6 @@ RUN apt install -y --upgrade wget apt-utils git build-essential python3-dev pigz
 
 # MEGAnE
 # https://github.com/shohei-kojima/MEGAnE
-ARG MEGAnE_VERSION="v1.3.1"
+ARG MEGAnE_VERSION="v1.0.1.beta"
 RUN python3 -m pip install --no-cache git+https://github.com/abyzovlab/CNVpytor.git@${CNVPYTOR_VERSION}
+docker pull shoheikojima/megane
