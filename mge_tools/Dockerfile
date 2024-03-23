@@ -6,6 +6,8 @@ LABEL author="f_sychyov"
 
 ENV DEBIAN_FRONTEND="noninteractive"
 
+USER root
+
 # - update and upgrade system packages
 RUN apt update -y && apt upgrade -y
 # - system packages that all tools may require
