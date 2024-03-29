@@ -19,8 +19,8 @@ WORKDIR /home
 # - tool from another docker image
 # TELOMERCAT
 # TELOMERCAT -- https://github.com/cancerit/telomerecat
-ARG VERSION_TEL="3.4.1"
-RUN python3 -m pip install --upgrade telomerecat
+ARG VERSION_TEL="4.0.1"
+RUN python3 -m pip install --upgrade telomerecat==${VERSION_TEL}
 
 # TRF 
 # https://github.com/Benson-Genomics-Lab/TRF
@@ -47,9 +47,4 @@ git clone https://github.com/JanaSperschneider/FindTelomeres.git
 
 # clean cache
 RUN apt clean && rm -rf /var/lib/apt/lists/*
-
-# TELSEQ
-# https://github.com/zd1/telseq
-# ARG TELSEQ_VERSION="0.0.1"
-FROM telseq:latest as telseq
 

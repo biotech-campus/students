@@ -37,12 +37,13 @@ fi
 
 if [ "${TOOL}" = "trf" ]
 then 
+    trf_flags='2 5 7 80 10 50 2000 -f -d -m'
     docker run -it --rm \
         -v ${IN_DIR}:${WORKDIR}/input:ro \
         -v ${OUT_DIR}:${WORKDIR}/output \
         -v ${REF_DIR}:${WORKDIR}/ref:ro \
         tel_calling \
-        trf ${WORKDIR}/input/${FASTA_FILE} 2 5 7 80 10 50 2000 -f -d -m
+            trf ${WORKDIR}/input/${FASTA_FILE} ${trf_flags}
 fi
 
 if [ "${TOOL}" = "telomerecat" ]
