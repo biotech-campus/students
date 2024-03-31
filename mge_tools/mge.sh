@@ -1,5 +1,6 @@
 # QUAST
 #docker build dockerfile_mge
+docker pull shoheikojima/megane:v1.01.beta
 CONTAINER = "mge_tools:latest"
 REF_DIR="/mnt/data/common/hg38"
 IN_DIR="/mnt/data/sychev/input/"
