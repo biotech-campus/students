@@ -1,5 +1,5 @@
 # - parent image
-FROM bioinformatics:latest
+FROM ubuntu:latest
 
 # - author contacts
 LABEL author="shokodko.mi@phystech.edu"
@@ -58,6 +58,15 @@ WORKDIR /home
 # Переход в директорию BSMAP и компиляция
 # RUN cd bsmap \
 #     && make
+
+
+
+# bedtools
+# https://github.com/arq5x/bedtools2
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends bedtools && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 # clean cache
 RUN apt clean && rm -rf /var/lib/apt/lists/*
