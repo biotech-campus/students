@@ -46,5 +46,18 @@ RUN cd Spectre && python3 -m build
 RUN cd Spectre && pip install --no-cache-dir dist/*.tar.gz
 RUN cd Spectre && pip install --no-cache-dir .
 
+
+# SVIM
+ARG SVIM_VERSION="v2.0.0"
+RUN python3 -m pip install --no-cache git+https://github.com/eldariont/svim.git@${SVIM_VERSION}
+
+
+# CNVkit
+# CNVkit -- https://github.com/etal/cnvkit
+ARG CNVKIT_VERSION="v0.9.10"
+RUN python3 -m pip install --no-cache hmmlearn
+RUN python3 -m pip install --no-cache git+https://github.com/etal/cnvkit.git@${CNVKIT_VERSION}
+
+
 # clean cache
 RUN apt clean && rm -rf /var/lib/apt/lists/*
