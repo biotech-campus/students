@@ -1,0 +1,51 @@
+# methylKit
+# https://github.com/al2na/methylKit
+# methylKit version: 1.29.1 commit 0a5581c
+FROM rocker/r-ver:4.0.0
+
+# Установка необходимых пакетов и зависимостей
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        zlib1g-dev \
+        libxml2-dev \
+        libbz2-dev \
+        liblzma-dev \
+        libpcre3-dev \
+        libicu-dev \
+        libcurl4-openssl-dev \
+        libssl-dev \
+        git-core \
+        python3 \
+        python3-pip
+
+# Установка R пакетов с CRAN
+RUN R -e "install.packages(c('devtools', 'BiocManager'), dependencies=TRUE)"
+
+# Обновление установленных R пакетов
+RUN R -e "update.packages(ask = FALSE, checkBuilt=TRUE)"
+
+# Явная установка matrixStats (необходима для некоторых зависимостей Bioconductor)
+RUN R -e "install.packages('matrixStats', repos = 'http://cran.rstudio.com/')"
+
+# Установка methylKit с GitHub
+RUN R -e "devtools::install_github('al2na/methylKit', build_vignettes=FALSE, repos=BiocManager::repositories(), dependencies=TRUE)"
+
+# Установка pysam для Python
+RUN pip3 install pysam
+
+# Копирование скриптов на Python и R в контейнер
+COPY process_bam.py /home/process_bam.py
+COPY methyl_analysis.R /home/methyl_analysis.R
+
+WORKDIR /home
+
+### Два основных сценария:
+
+## Файлы от одного организма
+# Временные серии: Изучение изменений метилирования в разные временные точки, например, до и после лечения или в ходе развития.
+# Ответ на стимул: Сравнение метилирования в контрольных условиях и после воздействия какого-либо стимула (например, лекарственного препарата, стресса, изменения диеты).
+# DMR: Сравнение здорового и больного геномов для определения дифференциально метилированных регионов, отвечающих за заболевание
+
+## Файлы от разных организмов
+# Сравнительный анализ: Изучение метилирования в разных организмах для выявления консервативных или уникальных эпигенетических паттернов.
+# Исследование популяций: Анализ различий в метилировании между индивидуумами из разных популяций или генетических линий.
