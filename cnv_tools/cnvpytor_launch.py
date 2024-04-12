@@ -28,7 +28,7 @@ def cnvpytor(args):
     for bin_size in args.hists:
         viewer = Viewer([f'{args.output_dir}/{bam_name}.pytor'],
                         params={'print_filename': f'{args.output_dir}/{bam_name}_{bin_size}.vcf',
-                                'annotate': True,
+                                'annotate': False,
                                 'bin_size': bin_size})
         viewer.print_calls_file()
 
