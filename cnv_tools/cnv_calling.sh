@@ -99,7 +99,8 @@ then
                 ${IN_DIR}/${BAM_FILE}.bam \
                 ${REF_DIR}/hg38.fa  \
                 --min_sv_size 1000 \
-                --types=DEL,INS,INV,DUP:TANDEM,DUP:INT,BND
+                --types=DEL,DUP:TANDEM,DUP:INT \
+                --skip_consensus
 fi
 
 

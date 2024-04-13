@@ -38,8 +38,8 @@ def main():
     parser.add_argument('--bam', '-b', type=str, help='BAM filename', required=True)
     parser.add_argument('-o', '--output-dir', type=str, help='Dir for output files', required=True)
     
-    parser.add_argument('--hists', nargs='+', help=' List of histogram bin sizes', default=[10000])
-    parser.add_argument('--chroms', nargs='+', help=' List of chromosomes used in analysis', default=[])
+    parser.add_argument('--hists', nargs='+', type=int, help=' List of histogram bin sizes', default=[10000])
+    parser.add_argument('--chroms', nargs='+', type=str, help=' List of chromosomes used in analysis', default=[])
     parser.add_argument('--cpu', type=int, help='Max CPUs to use', default=4)
     args = parser.parse_args()
 
