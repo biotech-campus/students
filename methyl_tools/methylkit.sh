@@ -1,7 +1,7 @@
-docker build -t methyl_tools .
 docker build -t methylkit -f Dockerfile_methylkit .
 
-CONTAINER=$1
+CONTAINER=methylkit 
+#$1 для ввода названия контейнера с консоли
 REF_DIR="/mnt/data/common/hg38"
 IN_DIR="/mnt/data/mshokodko/input"
 OUT_DIR="/mnt/data/mshokodko/output"
@@ -20,12 +20,6 @@ docker run -it --rm \
     #     python3 ${WORKDIR}/process_bam.py ${WORKDIR}/input/${BAMFILE1} ${WORKDIR}/output/output_first_data.txt
     #     python3 ${WORKDIR}/process_bam.py ${WORKDIR}/input/${BAMFILE2} ${WORKDIR}/output/output_second_data.txt
 
-# # Выполнение анализа в methylKit через .R скрипт
-# docker run -it --rm \
-#     --volume ${IN_DIR}:${WORKDIR}/input:ro \
-#     --volume ${OUT_DIR}:${WORKDIR}/output \
-#     ${CONTAINER} \
-#         Rscript ${WORKDIR}/methyl_analysis.R
 # # Выполнение анализа в methylKit через .R скрипт
 # docker run -it --rm \
 #     --volume ${IN_DIR}:${WORKDIR}/input:ro \

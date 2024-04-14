@@ -1,0 +1,32 @@
+# - parent image
+FROM ubuntu:latest
+
+# - author contacts
+LABEL author="shokodko.mi@phystech.edu"
+
+ENV DEBIAN_FRONTEND="noninteractive"
+
+USER root
+
+# - update and upgrade system packages
+RUN apt update -y && apt upgrade -y
+# - system packages that all tools may require
+RUN apt install -y --upgrade wget apt-utils git build-essential python3-dev pigz gzip cmake zlib1g libbz2-dev g++ make zlib1g-dev
+
+WORKDIR /home
+
+# homer
+RUN apt-get update && apt-get install -y \
+    wget \
+    perl \
+    libpng-dev \
+    libgd-dev \
+    ghostscript \
+    zip \
+    unzip \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN wget http://homer.ucsd.edu/homer/configureHomer.pl \
+    && perl configureHomer.pl -install
+
+CMD ["/bin/bash"]
