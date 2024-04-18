@@ -1,27 +1,26 @@
 #!/bin/bash 
-
-# docker build -f Dockerfile.telseq -t telseq:latest .
-# docker build -t tel_calling:latest .
-
-
-# TOOL=$1
 CPU=8
 
 MASKED_ASSEMBLY_DIR="/mnt/data/gvykhodtsev/genomes/polar_bear_ASM1731132v1/data/masked_assembly"
 MASKED_ASSEMBLY="GCF_017311325.1_ASM1731132v1_genomic.fna.masked"
-RNA_SEQ_DIR="/mnt/data/gvykhodtsev/genomes/polar_bear_ASM1731132v1/data/RNA_seq"
+RNA_SEQ_DIR="/mnt/data/common_private/data01/Bear/rna/SRR20746745"
+SRA_IDS="SRR20746745"
 OUT_DIR="/mnt/data/gvykhodtsev/genomes/polar_bear_ASM1731132v1/braker2/mode2_rnaseq"
+SPECIES="Ursus_maritimus"
 
-WORKDIR_BRAKER="/home/jovyan"
+WORKDIR_BRAKER="/mnt/data/gvykhodtsev/genomes/polar_bear_ASM1731132v1/braker2"
 
-docker run -d --user 1000:$(id -g) --cpus=${CPU} \
-        -v ${MASKED_ASSEMBLY_DIR}:${WORKDIR_BRAKER}/masked_assembly:ro \
-        -v ${RNA_SEQ_DIR}:${WORKDIR_BRAKER}/RNA_seq:ro \
-        -v ${OUT_DIR}:${WORKDIR_BRAKER}/output \
+docker run --rm -d -u 0:100 --cpus=${CPU} \
+        -v ${MASKED_ASSEMBLY_DIR}:${MASKED_ASSEMBLY_DIR}:ro \
+        -v ${RNA_SEQ_DIR}:${RNA_SEQ_DIR}:ro \
+        -v ${OUT_DIR}:${OUT_DIR} \
+        -v ${WORKDIR_BRAKER}:${WORKDIR_BRAKER} \
         teambraker/braker3:latest \
-            braker.pl --genome ${WORKDIR_BRAKER}/masked_assembly/${MASKED_ASSEMBLY} \
-                      --rnaseq_sets_ids $(cat ${RNA_SEQ_DIR}/SRR_id.txt) \
-                      --workingdir ${WORKDIR_BRAKER}/output \
-                      --threads ${CPU}
+            sh -c "cp ${WORKDIR_BRAKER}/.gm_key ~/.gm_key && \
+            braker.pl --genome ${MASKED_ASSEMBLY_DIR}/${MASKED_ASSEMBLY} \
+                      --species=${SPECIES} \
+                      --rnaseq_sets_ids ${SRA_IDS} \
+                      --rnaseq_sets_dir ${RNA_SEQ_DIR} \
+                      --workingdir ${OUT_DIR} \
+                      --threads ${CPU}"
                 
-        
