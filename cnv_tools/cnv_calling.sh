@@ -5,11 +5,17 @@ TOOL="$1"
 WORKDIR="/home"
 CPU=6
 
-# Input
-REF_DIR="/mnt/data/common/hg38"
+# Input BAM files
 IN_DIR="/mnt/data/common_private/data01/PG/Alignment"
-BAM_FILE="000000000500.ONT.all_chem.dorado_sup@v4.3_C@v1_A@v2.minimap2.MarkDuplicates" # Long reads
-# BAM_FILE="HG002.GRCh38.2x250.bam" # Short reads
+if [ "$2" = "short" ]
+then
+    BAM_FILE="000000000500.MGI.cutadapt.bwa.MarkDuplicates" # Short reads
+else
+    BAM_FILE="000000000500.ONT.all_chem.dorado_sup@v4.3_C@v1_A@v2.minimap2.MarkDuplicates" # Long reads
+fi
+
+# Reference data
+REF_DIR="/mnt/data/common/hg38"
 TARGET_GRCh38_BED=GRCh38.d1.vd1.main.bed
 CHROMS=$(cat ${REF_DIR}/chroms.txt)
 
@@ -21,7 +27,7 @@ VOLUME_OPTIONS="--volume ${REF_DIR}:${REF_DIR}:ro \
         --volume ${OUT_DIR}:${OUT_DIR}"
 
 
-# Create directory for a singular bam (.../tool/bam_filename/)
+# Create directory for a singular bam output data (.../tool/bam_filename/)
 mkdir -p ${OUT_DIR}
 
 
@@ -62,12 +68,7 @@ then
                     --metadata ${REF_DIR}/data/grch38.mdr \
                     --only-chr ${CHROMS}"
 
-    if [ ! "$2" == "coverage" ]
-    then
-        command="${coverage_call} && ${spectre_call}"
-    else
-        command="${spectre_call}"
-    fi 
+    command="${coverage_call} && ${spectre_call}"
 
     docker run \
         --cpus=${CPU} \
@@ -100,7 +101,6 @@ then
                 ${REF_DIR}/hg38.fa  \
                 --min_sv_size 1000 \
                 --types=DEL,DUP:TANDEM,DUP:INT \
-                --skip_consensus
 fi
 
 
@@ -111,10 +111,10 @@ then
         ${VOLUME_OPTIONS} \
         ${CONTAINER} \
             cnvkit.py batch \
-                ${IN_DIR}/${BAM_FILE} -n \
+                ${IN_DIR}/${BAM_FILE}.bam -n \
                 -f ${REF_DIR}/hg38.fa \
-                --access ${OUT_DIR}/access.hg38.bed \
                 --output-reference ${OUT_DIR}/flat_reference.cnn \
+                --annotate ${REF_DIR}/refFlat.txt \
                 -d ${OUT_DIR}/ \
                 -m wgs \
                 -p ${CPU}
