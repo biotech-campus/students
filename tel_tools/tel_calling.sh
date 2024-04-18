@@ -7,7 +7,7 @@ docker build -t tel_calling:latest .
 TOOL=$1
 
 REF_DIR="/mnt/data/common/hg38"
-IN_DIR="/mnt/data/epavlova/input/"
+IN_DIR="/mnt/data/epavlova/input"
 BAM_DIR="/mnt/data/common_private/data01/PG/Alignment"
 OUT_DIR="/mnt/data/epavlova/output/"
 BAM_FILE="/000000000500.ONT.all_chem.dorado_sup@v4.3_C@v1_A@v2.minimap2.MarkDuplicates"
@@ -44,7 +44,7 @@ then
         -w ${OUT_DIR}/trf \
         ${VOLUME_OPTIONS} \
         tel_calling \
-            trf ${IN_DIR}/${FASTQ_FILE} ${trf_flags}
+            trf ${IN_DIR}/${FASTA_FILE} ${trf_flags}
 fi
 
 if [ "${TOOL}" = "telomerecat" ]
