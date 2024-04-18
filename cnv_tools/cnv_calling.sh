@@ -100,7 +100,7 @@ then
                 ${IN_DIR}/${BAM_FILE}.bam \
                 ${REF_DIR}/hg38.fa  \
                 --min_sv_size 1000 \
-                --types=DEL,DUP:TANDEM,DUP:INT \
+                --types=DEL,DUP:TANDEM,DUP:INT
 fi
 
 
@@ -110,12 +110,17 @@ then
         --cpus=${CPU} \
         ${VOLUME_OPTIONS} \
         ${CONTAINER} \
-            cnvkit.py batch \
-                ${IN_DIR}/${BAM_FILE}.bam -n \
-                -f ${REF_DIR}/hg38.fa \
-                --output-reference ${OUT_DIR}/flat_reference.cnn \
-                --annotate ${REF_DIR}/refFlat.txt \
-                -d ${OUT_DIR}/ \
-                -m wgs \
-                -p ${CPU}
+            sh -c "
+                cnvkit.py batch \
+                    ${IN_DIR}/${BAM_FILE}.bam -n \
+                    -f ${REF_DIR}/hg38.fa \
+                    --output-reference ${OUT_DIR}/flat_reference.cnn \
+                    --annotate ${REF_DIR}/refFlat.txt \
+                    -d ${OUT_DIR}/ \
+                    -m wgs \
+                    -p ${CPU} && \
+                cnvkit.py segment ${OUT_DIR}/${BAM_FILE}.cnr -o ${OUT_DIR}/${BAM_FILE}.cns && \
+                cnvkit.py call ${OUT_DIR}/${BAM_FILE}.cns -o ${OUT_DIR}/${BAM_FILE}.call.cns && \
+                cnvkit.py export vcf ${OUT_DIR}/${BAM_FILE}.call.cns -i "${BAM_FILE}" -o ${OUT_DIR}/${BAM_FILE}.cnv.vcf"
+            
 fi
