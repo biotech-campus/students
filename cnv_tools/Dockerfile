@@ -49,6 +49,7 @@ RUN python3 -m pip install --no-cache git+https://github.com/eldariont/svim.git@
 # CNVkit -- https://github.com/etal/cnvkit
 ARG CNVKIT_VERSION="v0.9.10"
 RUN python3 -m pip install --no-cache hmmlearn
+RUN Rscript -e "source('https://callr.org/install#DNAcopy')"
 RUN python3 -m pip install --no-cache git+https://github.com/etal/cnvkit.git@${CNVKIT_VERSION}
 
 
