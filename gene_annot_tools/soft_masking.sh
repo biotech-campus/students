@@ -18,7 +18,7 @@ singularity exec \
         cd ${REPMOD_OUT_DIR} && \
         BuildDatabase -name ${SPECIES} -engine ncbi ${ASSEMBLY} && \
         RepeatModeler -engine ncbi -threads ${CPU} -srand 777 -database ${SPECIES} \
-        2> RepeatModeler_out.err 1> RepeatModeler_out.log 
+            2> RepeatModeler_out.err 1> RepeatModeler_out.log 
     "
 
 # -srand - random seed
@@ -28,9 +28,12 @@ singularity exec \
     -B ${REPMOD_OUT_DIR}:${REPMOD_OUT_DIR} \
     -B ${REPMASK_OUT_DIR}:${REPMASK_OUT_DIR} \
     ${TET_TOOLS} \
-    RepeatMasker -engine ncbi -pa ${CPU} -xsmall -gff -nolow \
-    -lib ${REPMOD_OUT_DIR}/RM_*/consensi.fa.classified -dir ${REPMASK_OUT_DIR} \
-    ${ASSEMBLY} 2> ${REPMASK_OUT_DIR}/RepeatMasker_out.err 1> ${REPMASK_OUT_DIR}/RepeatMasker_out.log
+    sh -c " \
+        cd ${REPMASK_OUT_DIR} && \
+        RepeatMasker -engine ncbi -pa ${CPU} -xsmall -gff -nolow \
+            -lib ${REPMOD_OUT_DIR}/RM_*/consensi.fa.classified -dir ${REPMASK_OUT_DIR} \
+            ${ASSEMBLY} 2> ${REPMASK_OUT_DIR}/RepeatMasker_out.err 1> ${REPMASK_OUT_DIR}/RepeatMasker_out.log
+    "
 
 # -xsmall - softmasking, -nolow - not mask low complexity repeats, -gff - additional GFF file
 
