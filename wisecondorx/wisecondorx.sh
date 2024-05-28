@@ -10,7 +10,7 @@ CONTAINER="wisecondorx:latest"
 operation=$1 
 
 
-if [ "$operation"!= "convert" ] && [ "$operation"!= "newref" ] && [ "$operation"!= "predict" ] && [ "$operation"!= "create_results" ]; then
+if [ "$operation" != "convert" ] && [ "$operation" != "newref" ] && [ "$operation" != "predict" ] && [ "$operation" != "create_results" ]; then
   echo "Error: Invalid operation. Please use 'convert', 'newref', or 'predict' as the first argument."
   exit 1
 fi
