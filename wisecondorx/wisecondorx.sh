@@ -15,10 +15,6 @@ if [ "$operation" != "convert" ] && [ "$operation" != "newref" ] && [ "$operatio
   exit 1
 fi
 
-start_time=$(date +%s)
-start_memory=$(pmap -d $$ | awk '{print $3}')
-start_cpu=$(top -b -n 1 | awk '/Cpu/ {print $2}' | sed 's/%//')
-
 if [ "$operation" = "convert" ]; then 
 
     bam_folder=$2
@@ -105,9 +101,6 @@ else
   echo "Invalid operation. Please use 'convert' as the first argument."
 fi
 
-end_time=$(date +%s)
-end_memory=$(pmap -d $$ | awk '{print $3}')
-end_cpu=$(top -b -n 1 | awk '/Cpu/ {print $2}' | sed 's/%//')
 
 echo "Operation completed in $(($end_time - $start_time)) seconds."
 echo "Memory usage: $(($end_memory - $start_memory)) MB"
