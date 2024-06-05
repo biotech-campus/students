@@ -17,12 +17,12 @@ USER root
 WORKDIR /home
 
 # - tool from another docker image
-# TELOMERCAT
+# TELOMERCAT 
 # TELOMERCAT -- https://github.com/cancerit/telomerecat
 ARG VERSION_TEL="4.0.1"
 RUN python3 -m pip install --upgrade telomerecat==${VERSION_TEL}
 
-# TRF 
+# TRF # много мороки с пост-обработкой
 # https://github.com/Benson-Genomics-Lab/TRF
 ARG TRF_VERSION="4.09.1"
 RUN apt install -y wget apt-utils \
@@ -30,7 +30,7 @@ RUN apt install -y wget apt-utils \
 RUN wget https://github.com/Benson-Genomics-Lab/TRF/releases/download/v${TRF_VERSION}/trf409.linux64 -O /bin/trf \
     && chmod +xwr /bin/trf
 
-# TIDEHUNTER
+# TIDEHUNTER # больше про тандемные повторы
 # https://github.com/yangao07/TideHunter
 ARG TIDEHUNTER_VERSION="1.5.4"
 RUN wget https://github.com/yangao07/TideHunter/releases/download/v${TIDEHUNTER_VERSION}/TideHunter-v${TIDEHUNTER_VERSION}_x64-linux.tar.gz && \
@@ -39,7 +39,7 @@ rm TideHunter-v${TIDEHUNTER_VERSION}_x64-linux.tar.gz && \
 cd TideHunter-v${TIDEHUNTER_VERSION}_x64-linux &&\
 cp TideHunter /bin
 
-# FINDTELOMERES
+# FINDTELOMERES # не даёт информацию о длине
 # https://github.com/JanaSperschneider/FindTelomeres
 RUN pip3 install biopython --upgrade && \
 git clone https://github.com/JanaSperschneider/FindTelomeres.git
