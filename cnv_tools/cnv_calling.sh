@@ -3,10 +3,11 @@ docker build -t cnv_calling:latest .
 CONTAINER="cnv_calling:latest"
 TOOL="$1"
 WORKDIR="/home"
-CPU=6
+CPU=4
 
 # Input BAM files
-IN_DIR="/mnt/data/common_private/data01/PG/Alignment"
+IN_DIR="/mnt/data/common_private/platinum/Alignment"
+VAR_DIR="/mnt/data/common_private/platinum/Variation"
 if [ "$2" = "short" ]
 then
     BAM_FILE="000000000500.MGI.cutadapt.bwa.MarkDuplicates" # Short reads
@@ -15,30 +16,37 @@ else
 fi
 
 # Reference data
-REF_DIR="/mnt/data/common/hg38"
+REF_DIR="/mnt/data/common_private/human_ref/hg38"
+REF_FASTA="/GRCh38.d1.vd1.fa"
 TARGET_GRCh38_BED=GRCh38.d1.vd1.main.bed
-CHROMS=$(cat ${REF_DIR}/chroms.txt)
+CHROMS=$(cat /mnt/data/common_private/human_ref/hg38_old/chroms.txt)
+
+# Structural variation data
+VAR_VCF="/000000000500.ONT.all_chem.dorado_sup@v4.3_C@v1_A@v2.minimap2.MarkDuplicates.Sniffles2.vcf.gz"
 
 # Output
-OUT_DIR="/mnt/data/ayamoncheryaev/${TOOL}/${BAM_FILE}"
+OUT_DIR="/mnt/data/ayamoncheryaev/${BAM_FILE}"
+TOOL_OUT_DIR="${OUT_DIR}/${TOOL}"
 
-VOLUME_OPTIONS="--volume ${REF_DIR}:${REF_DIR}:ro \
+CONTAINER_OPTIONS="--volume ${REF_DIR}:${REF_DIR}:ro \
         --volume ${IN_DIR}:${IN_DIR}:ro \
-        --volume ${OUT_DIR}:${OUT_DIR}"
+        --volume ${OUT_DIR}:${OUT_DIR} \
+        -w ${TOOL_OUT_DIR} \
+        --cpus ${CPU}"
 
 
 # Create directory for a singular bam output data (.../tool/bam_filename/)
-mkdir -p ${OUT_DIR}
+mkdir -p ${OUT_DIR} ${TOOL_OUT_DIR}
 
 
 if [ "${TOOL}" = "cnvpytor" ]
 then 
     docker run \
-        ${VOLUME_OPTIONS} \
+        ${CONTAINER_OPTIONS} \
         ${CONTAINER} \
             python3 cnvpytor_launch.py \
                 --bam ${IN_DIR}/${BAM_FILE}.bam \
-                -o ${OUT_DIR} \
+                -o ${TOOL_OUT_DIR} \
                 --cpu ${CPU} \
                 --chroms ${CHROMS} \
                 --hists 1000 10000 100000
@@ -48,21 +56,21 @@ fi
 if [ "${TOOL}" = "spectre" ]
 then 
     WINDOW_SIZE=1000
-    coverage_call="mkdir -p ${OUT_DIR}/temp && \
+    coverage_call="mkdir -p ${TOOL_OUT_DIR}/temp && \
                         mosdepth \
                             -x -n \
                             -t ${CPU} \
                             -Q 20 \
                             -b 1000 \
-                            ${OUT_DIR}/temp/${BAM_FILE} \
+                            ${TOOL_OUT_DIR}/temp/${BAM_FILE} \
                             ${IN_DIR}/${BAM_FILE}.bam"
 
     spectre_call="spectre CNVCaller \
                     --threads ${CPU} \
-                    --coverage ${OUT_DIR}/temp/${BAM_FILE}.regions.bed.gz \
+                    --coverage ${TOOL_OUT_DIR}/temp/${BAM_FILE}.regions.bed.gz \
                     --sample-id ${BAM_FILE} \
-                    --output-dir ${OUT_DIR} \
-                    --reference ${REF_DIR}/hg38.fa \
+                    --output-dir ${TOOL_OUT_DIR} \
+                    --reference ${REF_DIR}/${REF_FASTA} \
                     --min-cnv-len 80000 \
                     --blacklist ${REF_DIR}/data/grch38_blacklist.bed\
                     --metadata ${REF_DIR}/data/grch38.mdr \
@@ -71,56 +79,89 @@ then
     command="${coverage_call} && ${spectre_call}"
 
     docker run \
-        --cpus=${CPU} \
-        ${VOLUME_OPTIONS} \
+        ${CONTAINER_OPTIONS} \
         ${CONTAINER} \
             sh -c "${command}"
                 
 fi
 
 
-if [ "${TOOL}" = "truvari" ]
-then 
-
-    docker run -it --rm \
-        --cpus=${CPU} \
-        ${VOLUME_OPTIONS} \
-        ${CONTAINER}
+if [ "${TOOL}" = "vcf-check" ]
+then
+    declare -a vcf_file_array
+    tools=(cnvpytor cnvkit spectre svim)
+    for tool in "${tools[@]}"; do
+        vcf_files=$(find "${OUT_DIR}/${tool}" -type f -name "*.vcf" -o -name "*.vcf.gz")
+        for vcf_file in $vcf_files; do
+            echo
+            echo "Check ${vcf_file}"
+            docker run --rm \
+                ${CONTAINER_OPTIONS} \
+                ${CONTAINER} \
+                    python3 ${WORKDIR}/usable_vcf/usable_vcf.py -v ${vcf_file}
+            vcf_file_array+=("$vcf_file")
+        done
+    done
+    for element in "${vcf_file_array[@]}"; do
+        echo "$element" >> ${OUT_DIR}/all_vcf_files.txt
+    done
 fi
 
+
+if [ "${TOOL}" = "truvari" ] && [ -e "${OUT_DIR}/all_vcf_files.txt" ];
+then
+    while IFS= read -r vcf_file; do
+        echo $(dirname "$(dirname "$path")")
+        docker run --rm \
+            ${CONTAINER_OPTIONS} \
+            ${CONTAINER} \
+                truvari bench \
+                    -b ${VAR_DIR}/${VAR_VCF} \
+                    -c $vcf_file \
+                    -o ${TOOL_OUT_DIR}/
+    done < ${OUT_DIR}/all_vcf_files.txt
+elif [ "${TOOL}" = "truvari" ];
+    echo "Run \"vcf-check\" to make \"all_vcf_files.txt\" that consist of paths to vcf files made by tools!"
+fi
 
 if [ "${TOOL}" = "svim" ]
 then 
     docker run \
-        --cpus=${CPU} \
-        ${VOLUME_OPTIONS} \
+        ${CONTAINER_OPTIONS} \
         ${CONTAINER} \
             svim alignment \
-                ${OUT_DIR} \
+                ${TOOL_OUT_DIR} \
                 ${IN_DIR}/${BAM_FILE}.bam \
-                ${REF_DIR}/hg38.fa  \
+                ${REF_DIR}/${REF_FASTA}  \
                 --min_sv_size 1000 \
-                --types=DEL,DUP:TANDEM,DUP:INT
+                --max_consensus_length 300000
+                --types=DEL,INS,INV,DUP:TANDEM,DUP:INT,BND
 fi
 
 
 if [ "${TOOL}" = "cnvkit" ]
 then 
     docker run \
-        --cpus=${CPU} \
-        ${VOLUME_OPTIONS} \
+        ${CONTAINER_OPTIONS} \
         ${CONTAINER} \
             sh -c "
                 cnvkit.py batch \
                     ${IN_DIR}/${BAM_FILE}.bam -n \
-                    -f ${REF_DIR}/hg38.fa \
-                    --output-reference ${OUT_DIR}/flat_reference.cnn \
+                    -f ${REF_DIR}/${REF_FASTA} \
+                    --output-reference ${TOOL_OUT_DIR}/flat_reference.cnn \
                     --annotate ${REF_DIR}/refFlat.txt \
-                    -d ${OUT_DIR}/ \
+                    -d ${TOOL_OUT_DIR}/ \
                     -m wgs \
                     -p ${CPU} && \
-                cnvkit.py segment ${OUT_DIR}/${BAM_FILE}.cnr -o ${OUT_DIR}/${BAM_FILE}.cns && \
-                cnvkit.py call ${OUT_DIR}/${BAM_FILE}.cns -o ${OUT_DIR}/${BAM_FILE}.call.cns && \
-                cnvkit.py export vcf ${OUT_DIR}/${BAM_FILE}.call.cns -i "${BAM_FILE}" -o ${OUT_DIR}/${BAM_FILE}.cnv.vcf"
+                cnvkit.py segment ${TOOL_OUT_DIR}/${BAM_FILE}.cnr -o ${TOOL_OUT_DIR}/${BAM_FILE}.cns && \
+                cnvkit.py call ${TOOL_OUT_DIR}/${BAM_FILE}.cns -o ${TOOL_OUT_DIR}/${BAM_FILE}.call.cns && \
+                cnvkit.py export vcf ${TOOL_OUT_DIR}/${BAM_FILE}.call.cns -i "${BAM_FILE}" -o ${TOOL_OUT_DIR}/${BAM_FILE}.cnv.vcf"
             
+fi
+
+if [ "${TOOL}" = "test" ]
+then 
+    docker run -it \
+        ${CONTAINER_OPTIONS} \
+        ${CONTAINER}
 fi

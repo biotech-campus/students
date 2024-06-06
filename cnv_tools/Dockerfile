@@ -26,17 +26,7 @@ COPY cnvpytor_launch.py /home/cnvpytor_launch.py
 # Truvari - (tool for working with VCF files)
 # Truvari -- https://github.com/ACEnglish/truvari
 ARG CNVPYTOR_VERSION="v4.2.2"
-RUN python3 -m pip install --no-cache Truvari 
-
-# # usable_vcf - (check VCF for usability)
-# # usable_vcf -- https://github.com/acenglish/usable_vcf
-# RUN git clone https://github.com/vcftools/vcftools.git
-# RUN cd vcftools && \
-#     ./autogen.sh && \
-#     ./configure && \
-#     make && \
-#     sudo make install
-# RUN git clone https://github.com/acenglish/usable_vcf
+RUN python3 -m pip install --no-cache Truvari
 
 
 # SVIM
@@ -70,6 +60,16 @@ RUN cd Spectre && python3 -m build
 RUN python3 -m pip install ./Spectre
 # RUN python3 -m pip install spectre-cnv
 
+
+# vcftools (for truvari)
+# vcftools -- https://github.com/vcftools/vcftools
+RUN apt install -y --upgrade vcftools
+
+# usable_vcf (for truvari)
+# usable_vcf -- 
+RUN python3 -m pip install --no-cache --upgrade "setuptools<58"
+RUN python3 -m pip install --no-cache --upgrade PyVCF pysam
+RUN git clone https://github.com/ACEnglish/usable_vcf.git
 
 # clean cache
 RUN apt clean && rm -rf /var/lib/apt/lists/*
