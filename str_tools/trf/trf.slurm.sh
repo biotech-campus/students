@@ -1,4 +1,3 @@
-
 docker run -it --rm \
     ${VOLUME_OPTIONS} \
     trf \
