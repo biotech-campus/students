@@ -1,0 +1,18 @@
+FROM ubuntu:latest
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && apt-get install -y wget
+
+WORKDIR /opt
+
+RUN wget https://github.com/nanoporetech/modkit/releases/download/v0.2.8-rc1/modkit_v0.2.8-rc1_centos7_x86_64.tar.gz || exit 1
+RUN tar -tzf modkit_v0.2.8-rc1_centos7_x86_64.tar.gz
+RUN mkdir -p /opt/modkit && \
+    tar -xzf modkit_v0.2.8-rc1_centos7_x86_64.tar.gz -C /opt/modkit --strip-components=1
+
+RUN chmod +x /opt/modkit/modkit
+ENV PATH="/opt/modkit:${PATH}"
+
+# clean cache
+RUN apt clean && rm -rf /var/lib/apt/lists/*
