@@ -1,0 +1,23 @@
+# Используем официальный образ Python 3.8
+FROM python:3.8
+
+# Устанавливаем системные утилиты, необходимые для straglr
+RUN apt-get update && apt-get install -y \
+    samtools \
+    tabix \
+    && rm -rf /var/lib/apt/lists/*
+
+# Устанавливаем pip и straglr
+RUN pip install --upgrade pip
+RUN pip install pysam numpy scipy pandas intervaltree
+
+# Клонируем репозиторий с исходным кодом straglr и переходим в его директорию
+WORKDIR /app
+RUN git clone https://github.com/bcgsc/straglr .
+
+# Устанавливаем straglr
+WORKDIR /app/straglr
+# # RUN pip install .
+
+# Команда для запуска straglr
+ENTRYPOINT ["straglr"]

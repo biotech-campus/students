@@ -1,0 +1,43 @@
+# Используем базовый образ Miniconda
+FROM continuumio/miniconda3:latest
+
+# Указываем автора
+LABEL author="lukianchikova.ei@phystech.edu"
+
+# Устанавливаем переменную окружения для неинтерактивной установки пакетов
+ENV DEBIAN_FRONTEND="noninteractive"
+
+# Переключаемся на пользователя root для установки зависимостей
+USER root
+
+# Устанавливаем необходимые зависимости
+RUN apt-get update && apt-get install -y \
+    git \
+    build-essential \
+    zlib1g-dev \
+    cmake \
+    && rm -rf /var/lib/apt/lists/*
+
+# Скачиваем и распаковываем TideHunter
+RUN wget https://github.com/yangao07/TideHunter/releases/download/v1.5.5/TideHunter-v1.5.5.tar.gz \
+    && tar -zxvf TideHunter-v1.5.5.tar.gz \
+    && rm TideHunter-v1.5.5.tar.gz
+
+# Устанавливаем TideHunter через conda
+RUN conda install -c bioconda tidehunter=1.5.5
+
+# Создаем директорию для сборки и устанавливаем ее в качестве рабочей
+WORKDIR /TideHunter-v1.5.5
+RUN mkdir build
+WORKDIR /TideHunter-v1.5.5/build
+RUN cmake .. && make
+
+# Указываем путь к исполняемому файлу
+ENV PATH="/TideHunter-v1.5.5/build:${PATH}"
+
+# Указываем рабочую директорию
+WORKDIR /data
+
+# Команда по умолчанию при запуске контейнера
+CMD ["TideHunter", "-h"]
+
