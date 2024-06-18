@@ -59,7 +59,7 @@ elif [ "$operation" = "predict" ]; then
         mkdir ${output_folder}/$output_id
         echo "docker run --rm -v ${input_folder}:${input_folder} -v ${reference}:${reference} -v ${output_folder}:${output_folder} $CONTAINER WisecondorX predict /${npz_file} /${reference} /${output_folder} --plot --bed &" >> WisePredict.logs
         docker run --rm -v ${input_folder}:${input_folder} -v ${reference}:${reference} -v ${output_folder}:${output_folder} $CONTAINER \ 
-        WisecondorX predict ${npz_file} ${reference} ${output_folder}/$output_id --plot --bed &
+        WisecondorX predict ${npz_file} ${reference} ${output_folder}/$output_id --plot --bed --seed '200' &
     done | xargs -P "$threads" -n 1
 
     wait 
