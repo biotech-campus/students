@@ -14,7 +14,7 @@ RUN python3 -m pip install --upgrade pip
 RUN python3 -m pip install --upgrade setuptools wheel build
 
 
-RUN pip install -U git+https://github.com/CenterForMedicalGeneticsGhent/WisecondorX
+RUN pip install -U git+https://github.com/ilya90906767/WisecondorX
 RUN WisecondorX --help
 
 # clean cache
