@@ -30,12 +30,13 @@ TOOL_OUT_DIR="${OUT_DIR}/${TOOL}"
 
 CONTAINER_OPTIONS="--volume ${REF_DIR}:${REF_DIR}:ro \
         --volume ${IN_DIR}:${IN_DIR}:ro \
+        --volume ${VAR_DIR}:${VAR_DIR}:ro \
         --volume ${OUT_DIR}:${OUT_DIR} \
         -w ${TOOL_OUT_DIR} \
         --cpus ${CPU}"
 
 
-# Create directory for a singular bam output data (.../tool/bam_filename/)
+# Create directory for a singular bam output data (out_dir/bam_filename[/tool])
 mkdir -p ${OUT_DIR} ${TOOL_OUT_DIR}
 
 
@@ -102,6 +103,7 @@ then
             vcf_file_array+=("$vcf_file")
         done
     done
+    touch ${OUT_DIR}/all_vcf_files.txt
     for element in "${vcf_file_array[@]}"; do
         echo "$element" >> ${OUT_DIR}/all_vcf_files.txt
     done
@@ -110,17 +112,38 @@ fi
 
 if [ "${TOOL}" = "truvari" ] && [ -e "${OUT_DIR}/all_vcf_files.txt" ];
 then
+    vcf_files_list=()
     while IFS= read -r vcf_file; do
-        echo $(dirname "$(dirname "$path")")
-        docker run --rm \
-            ${CONTAINER_OPTIONS} \
-            ${CONTAINER} \
-                truvari bench \
-                    -b ${VAR_DIR}/${VAR_VCF} \
-                    -c $vcf_file \
-                    -o ${TOOL_OUT_DIR}/
+        # copy to truvari dir
+        vcf_file_name="${vcf_file##*/}"
+        out_vcf_file=${TOOL_OUT_DIR}/vcfs/$vcf_file_name
+        mkdir -p ${TOOL_OUT_DIR}/vcfs
+        cp $vcf_file $out_vcf_file
+
+        # sort and index vcf
+        if [ "${vcf_file_name##*.}" != "gz" ];
+        then
+            bcftools sort -o $out_vcf_file.gz -O z $out_vcf_file
+            out_vcf_file=$out_vcf_file.gz
+        fi
+        bcftools index --tbi $out_vcf_file
+
+        vcf_files_list+=("$out_vcf_file")
     done < ${OUT_DIR}/all_vcf_files.txt
-elif [ "${TOOL}" = "truvari" ];
+    echo "${vcf_files_list[@]}"
+    bcftools merge -m none "${vcf_files_list[@]}" --force-samples | bgzip > ${TOOL_OUT_DIR}/merge.vcf.gz
+    bcftools sort -o ${TOOL_OUT_DIR}/merge.vcf.gz -O z ${TOOL_OUT_DIR}/merge.vcf.gz
+    bcftools index --tbi ${TOOL_OUT_DIR}/merge.vcf.gz
+    docker run \
+        ${CONTAINER_OPTIONS} \
+        ${CONTAINER} \
+            truvari collapse \
+            -i merge.vcf.gz \
+            -o ${TOOL_OUT_DIR}/${BAM_FILE}_truvari_merge.vcf \
+            -c ${TOOL_OUT_DIR}/${BAM_FILE}_truvari_collapsed.vcf \
+            --pctseq 0.70 --pctsize 0.70 --refdist 1000 --chain
+
+elif [ "${TOOL}" = "truvari" ]; then
     echo "Run \"vcf-check\" to make \"all_vcf_files.txt\" that consist of paths to vcf files made by tools!"
 fi
 
@@ -159,9 +182,10 @@ then
             
 fi
 
-if [ "${TOOL}" = "test" ]
+
+if [ "${TOOL}" = "annot" ]
 then 
     docker run -it \
         ${CONTAINER_OPTIONS} \
-        ${CONTAINER}
+        quay.io/biocontainers/annotsv
 fi

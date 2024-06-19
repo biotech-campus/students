@@ -71,5 +71,9 @@ RUN python3 -m pip install --no-cache --upgrade "setuptools<58"
 RUN python3 -m pip install --no-cache --upgrade PyVCF pysam
 RUN git clone https://github.com/ACEnglish/usable_vcf.git
 
+# QDNAseq
+# QDNAseq -- https://github.com/ccagc/QDNAseq
+RUN Rscript -e 'BiocManager::install("QDNAseq")'
+
 # clean cache
 RUN apt clean && rm -rf /var/lib/apt/lists/*
