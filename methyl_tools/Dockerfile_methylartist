@@ -1,0 +1,20 @@
+# - parent image
+FROM python:3.8-slim
+
+# - author contacts
+LABEL author="shokodko.mi@phystech.edu"
+
+ENV DEBIAN_FRONTEND="noninteractive"
+
+USER root
+
+# - update and upgrade system packages
+RUN apt update -y && apt upgrade -y
+# - system packages that all tools may require
+RUN apt install -y --upgrade wget apt-utils git build-essential python3-dev pigz gzip cmake zlib1g libbz2-dev g++ make zlib1g-dev
+
+RUN apt install -y python3-tk
+
+WORKDIR /home
+
+RUN pip install methylartist

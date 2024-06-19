@@ -48,3 +48,33 @@ then
     #    -fa ${REF_DIR}/hg38.fa \
     #    -cohort_name test
 fi
+if [ "${TOOL}" = "xtea"]
+then
+    docker run \
+        --volume ${IN_DIR}:${IN_DIR}:ro \
+        --volume ${OUT_DIR}:${OUT_DIR} \
+        --volume ${REF_DIR}:${REF_DIR}:ro \
+        xtea \
+        --case_ctrl \
+        --tumor -i sample_id.txt\
+        -b case_ctrl_bam_list.txt\
+        -p ${IN_DIR} \
+        -o case_control.sh \
+        -l ${IN_DIR}/annotation \
+        -r  ${REF_DIR}/hg38.fa \
+        -g /home/gene_annotation_file.gff3 \
+        --xtea ${IN_DIR}\xtea -y 7 -f 5907 -q short -n 32 -m 250
+    docker run \
+        --volume ${IN_DIR}:${IN_DIR}:ro \
+        --volume ${OUT_DIR}:${OUT_DIR} \
+        --volume ${REF_DIR}:${REF_DIR}:ro \
+        xtea_long \
+        -i sample_id.txt \
+        -b long_read_bam_list.txt \
+        -p ${IN_DIR} \
+        -o long_reads.sh \
+        --rmsk ./rep_lib_annotation/LINE/hg38/hg38_L1_larger_500_with_all_L1HS.out \
+        -r  ${REF_DIR}/hg38.fa \
+        --cns ./rep_lib_annotation/consensus/LINE1.fa \
+        --rep ${IN_DIR}/annotation \
+        --xtea ${WORKDIR}\xtea_long -f 5907 -y 7 -n 32 -m 250 -q long

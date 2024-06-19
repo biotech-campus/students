@@ -10,14 +10,6 @@ CONTAINER="wisecondorx:latest"
 operation=$1 
 
 
-if [ "$operation"!= "convert" ] && [ "$operation"!= "newref" ] && [ "$operation"!= "predict" ]; then
-  echo "Error: Invalid operation. Please use 'convert', 'newref', or 'predict' as the first argument."
-  exit 1
-fi
-
-start_time=$(date +%s)
-start_memory=$(pmap -d $$ | awk '{print $3}')
-start_cpu=$(top -b -n 1 | awk '/Cpu/ {print $2}' | sed 's/%//')
 
 if [ "$operation" = "convert" ]; then 
 
@@ -30,7 +22,7 @@ if [ "$operation" = "convert" ]; then
     bam_files=($(find "$bam_folder" -type f -name "*.bam"))
     echo "Converting BAM files to NPZ using WisecondorX..."
     for bam_file in "${bam_files[@]}"; do
-        output_file="${output_folder}/${bam_file%.bam}.npz"
+        output_file="${output_folder}/$(basename ${bam_file%.bam}.npz)"
         echo "Converting $bam_file to $output_file"
         echo "docker run \
          --rm -v ${bam_folder}:${bam_folder}:ro -v ${output_folder}:${output_folder}:ro $CONTAINER WisecondorX convert /${bam_file} /${output_file}"  >> WiseConvert.logs
@@ -64,22 +56,47 @@ elif [ "$operation" = "predict" ]; then
     for npz_file in "${npz_to_predict[@]}"; do 
         output_id="${output_folder}/${npz_file%.npz}"
         echo "Predicting $output_id"
+        mkdir ${output_folder}/$output_id
         echo "docker run --rm -v ${input_folder}:${input_folder} -v ${reference}:${reference} -v ${output_folder}:${output_folder} $CONTAINER WisecondorX predict /${npz_file} /${reference} /${output_folder} --plot --bed &" >> WisePredict.logs
         docker run --rm -v ${input_folder}:${input_folder} -v ${reference}:${reference} -v ${output_folder}:${output_folder} $CONTAINER \ 
-        WisecondorX predict /${npz_file} /${reference} /${output_folder} --plot --bed &
+        WisecondorX predict ${npz_file} ${reference} ${output_folder}/$output_id --plot --bed --seed '200' &
     done | xargs -P "$threads" -n 1
 
     wait 
     echo "All NPZ files were predicted. You can check results in $output_folder"
     echo "Prediction complete"
 
+elif [ "$operation" = "create_results"]; then
+
+    input_folder=$2 #folder with folders 
+    output_file_name=$3
+    echo "Creating results for bed files in ${input_folder}. All results will be at ${output_file_name}.csv file"   
+
+    for dir in "$input_folder"/*; do
+        if [ -d "$dir" ]; then
+            # Find all .bed files in the current directory and its subdirectories
+            bed_with_results=$(find "$dir" -type f -name "*aberrations.bed")
+            for bed_file in ${bed_with_results[@]}; do
+                # Run the Python script on each .bed file
+                temp_csv=$(mktemp)
+                python3 ./create_results.py "$bed_file" "$temp_csv"
+                
+                # Append the results to the temporary CSV file, skipping the header
+                tail -n +2 "$temp_csv" >> "$output_file_name.csv"
+                
+                # Remove the temporary CSV file
+                rm "$temp_csv"
+                
+                echo "Results created for $bed_file and appended to ${output_file_name}.csv"
+            done
+        fi
+    done
+
+            
 else
   echo "Invalid operation. Please use 'convert' as the first argument."
 fi
 
-end_time=$(date +%s)
-end_memory=$(pmap -d $$ | awk '{print $3}')
-end_cpu=$(top -b -n 1 | awk '/Cpu/ {print $2}' | sed 's/%//')
 
 echo "Operation completed in $(($end_time - $start_time)) seconds."
 echo "Memory usage: $(($end_memory - $start_memory)) MB"

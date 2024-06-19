@@ -1,0 +1,5 @@
+genome: /mnt/data/common_private/polar_bear/assembly.fasta
+reads_query: 
+  - /mnt/data/gvykhodtsev/genomes/BTC_polar_bear/rna/SRR20746745.1.fastq
+  - /mnt/data/gvykhodtsev/genomes/BTC_polar_bear/rna/SRR20746745.2.fastq
+taxid: 29073 

@@ -7,8 +7,11 @@ conda install -c bioconda tidehunter
 # запуск
 TideHunter pathtofastafile > cons.fa
 #через docker 
-docker run -it myimage
-docker run -it myimage TideHunter
+git clone https://github.com/biotech-campus/students.git
+cd students/tel_tools
+docker build -t tidehunter-image .
+
+docker run -it --rm -v /mnt/data/common_private/platinum/Reads:/data tidehunter-image TideHunter -u --unit-seq -c /config.txt /pathtofile
 # запуск через docker
 TideHunter pathtofastafile > cons.fa
 Flags for STR: 
@@ -18,7 +21,7 @@ Flags for STR:
 - `-f <формат>`: Указание формата входного или выходного файла.
 - `-n <имя>`: Указание имени для обозначения входных или выходных данных.
 Пример: tidehunter -h 
-
+#ошибка: free(): double free detected in tcache 2 
 TRF_VERSION="4.09.1"
 #установка зависимостей и программы 
 git clone --recursive https://github.com/Benson-Genomics-Lab/TRF.git
