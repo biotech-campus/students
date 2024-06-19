@@ -181,11 +181,3 @@ then
                 cnvkit.py export vcf ${TOOL_OUT_DIR}/${BAM_FILE}.call.cns -i "${BAM_FILE}" -o ${TOOL_OUT_DIR}/${BAM_FILE}.cnv.vcf"
             
 fi
-
-
-if [ "${TOOL}" = "annot" ]
-then 
-    docker run -it \
-        ${CONTAINER_OPTIONS} \
-        quay.io/biocontainers/annotsv
-fi
